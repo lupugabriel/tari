@@ -20,6 +20,7 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+use std::sync::Arc;
 use tari_core::{
     blocks::{Block, BlockBuilder, BlockHeader, NewBlockTemplate},
     chain_storage::{BlockAddResult, BlockchainBackend, BlockchainDatabase, ChainStorageError, MemoryDatabase},
@@ -32,6 +33,7 @@ use tari_transactions::{
         create_random_signature_from_s_key,
         create_utxo,
         spend_utxos,
+        TestParams,
         TransactionSchema,
     },
     tari_amount::MicroTari,
