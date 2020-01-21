@@ -104,5 +104,5 @@ pub fn get_gen_block_hash() -> Vec<u8> {
 }
 
 pub fn get_gen_header() -> BlockHeader {
-    BlockHeader::new(0)
+    get_genesis_block().header
 }
