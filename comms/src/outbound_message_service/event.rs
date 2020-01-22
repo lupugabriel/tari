@@ -1,4 +1,4 @@
-// Copyright 2019, The Tari Project
+// Copyright 2020, The Tari Project
 //
 // Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
 // following conditions are met:
@@ -20,42 +20,21 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-/// This macro unlocks a Mutex or RwLock. If the lock is
-/// poisoned (i.e. panic while unlocked) the last value
-/// before the panic is used.
-macro_rules! acquire_lock {
-    ($e:expr, $m:ident) => {
-        match $e.$m() {
-            Ok(lock) => lock,
-            Err(poisoned) => {
-                log::warn!(target: "dht", "Lock has been POISONED and will be silently recovered");
-                poisoned.into_inner()
-            },
-        }
-    };
-    ($e:expr) => {
-        acquire_lock!($e, lock)
-    };
-}
+use super::MessageTag;
+use crate::peer_manager::NodeId;
+use std::sync::Arc;
+use tokio::sync::broadcast;
 
-macro_rules! acquire_write_lock {
-    ($e:expr) => {
-        acquire_lock!($e, write)
-    };
-}
+pub type OutboundEventSubscription = broadcast::Receiver<Arc<OutboundEvent>>;
+pub type OutboundEventPublisher = broadcast::Sender<Arc<OutboundEvent>>;
 
-#[cfg(any(test, feature = "test-mocks"))]
-#[allow(unused_macros)]
-macro_rules! acquire_read_lock {
-    ($e:expr) => {
-        acquire_lock!($e, read)
-    };
-}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum OutboundEvent {
+    PeerDialStart(NodeId),
+    PeerDialSuccess(NodeId),
+    PeerDialFail(NodeId),
+    PeerDialRetry(NodeId, usize),
 
-/// A small wrapper macro which includes rust files generated from protos
-#[macro_export]
-macro_rules! include_proto_package {
-    ($path:expr) => {
-        include!(concat!(env!("OUT_DIR"), "/", $path, ".rs"));
-    };
+    MessageSendSuccess(MessageTag, NodeId),
+    MessageSendFail(MessageTag, NodeId),
 }
